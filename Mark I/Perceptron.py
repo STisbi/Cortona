@@ -2,17 +2,19 @@ import numpy as np
 
 
 class Perceptron:
-    mNumInputs = None
-    mNumNeurons = None
+    num_inputs = None
+    num_neurons = None
+    num_epochs = None
 
-    mInputs = None
-    mTargets = None
-    mWeights = None
-    mBias = None
+    inputs = None
+    targets = None
+    weights = None
+    bias = None
 
-    def __init__(self, pNumNeurons, pNumInputs):
-        self.mNumNeurons = pNumNeurons
-        self.mNumInputs = pNumInputs
+    def __init__(self, num_neurons, num_inputs, num_epochs):
+        self.num_neurons = num_neurons
+        self.num_inputs = num_inputs
+        self.num_epochs = num_epochs
 
     def Initialize(self):
         self.InitializeWeights()
@@ -21,24 +23,46 @@ class Perceptron:
         self.InitializeTargets()
 
     def InitializeWeights(self):
-        self.mWeights = np.random.rand(self.mNumNeurons, self.mNumInputs)
+        self.setWeights(np.random.rand(self.num_neurons, self.num_inputs))
 
-        self.mWeights = np.array([1.0, -0.8])
+        self.setWeights(np.array([0.5, -1, -0.5]))
 
     def InitializeBias(self):
-        self.mBias = np.random.rand(self.mNumNeurons, 1)
+        self.setBias(np.array([0.5]))
 
     def InitializeInputs(self):
-        self.mInputs = np.array([[1,2],[-1,2], [0,-1]]).transpose()
+        self.setInputs(np.array([[1, -1, -1], [1, 1, -1]]).transpose())
 
     def InitializeTargets(self):
-        self.mTargets = np.array([1, 0, 0])
+        self.setTargets(np.array([0, 1]))
 
-    def getInputs(self):
-        return self.mInputs
+    # The matrix is always written as a (S, R)
+    def setWeights(self, weights):
+        self.weights = weights
 
-    def getTargets(self):
-        return self.mTargets
+        if self.weights.ndim < 2:
+            self.weights = self.weights.reshape((1, self.weights.size))
+
+    # The matrix is always written as a (S, R)
+    def setBias(self, bias):
+        self.bias = bias
+
+        if self.bias.ndim < 2:
+            self.bias = self.bias.reshape((1, self.bias.size))
+
+    def setInputs(self, inputs):
+        self.inputs = inputs
+
+        # If its a (n,) then transform it into a (n, 1)
+        if inputs.ndim < 2:
+            self.inputs = self.inputs.reshape((self.inputs.size, 1))
+
+    def setTargets(self, targets):
+        self.targets = targets
+
+        # If its a (n,) then transform it into a (n, 1)
+        if targets.ndim < 2:
+            self.targets = self.targets.reshape((self.targets.size, 1))
 
     def PrintAll(self):
         self.PrintWeights()
@@ -47,54 +71,73 @@ class Perceptron:
         self.PrintTargets()
 
     def PrintWeights(self):
-        print('Weight Shape:', self.mWeights.shape, '\n', self.mWeights, '\n')
+        print('Weight Shape:', self.weights.shape, '\n', self.weights, '\n')
 
     def PrintBias(self):
-        print('Bias Shape:', self.mInputs.shape, '\n', self.mBias, '\n')
+        print('Bias Shape:', self.bias.shape, '\n', self.bias, '\n')
 
     def PrintInputs(self):
-        print('Input Shape:', self.mInputs.shape, '\n', self.mInputs, '\n')
+        print('Input Shape:', self.inputs.shape, '\n', self.inputs, '\n')
 
     def PrintTargets(self):
-        print('Targets Shape:', self.mTargets.shape, '\n', self.mTargets, '\n')
+        print('Targets Shape:', self.targets.shape, '\n', self.targets, '\n')
 
     def Run(self):
-        print('Initial Weights')
-        self.PrintWeights()
+        self.PrintAll()
 
-        for iteration in range(self.mInputs.shape[1]):
-            ithInput = np.array(self.mInputs[:,iteration])
+        for epoch in range(self.num_epochs):
+            for iteration in range(self.inputs.shape[1]):
+                # Grab the first column of input and convert it
+                # from (n,) to (n, 1)
+                ith_input = np.array(self.inputs[:, iteration])
+                ith_input = ith_input.reshape((ith_input.size, 1))
 
-            result_weight = np.dot(self.mWeights, ithInput)
-            # result_bias = np.add(result_weight, self.mBias)
+                result_weight = np.dot(self.weights, ith_input)
+                result_bias = np.add(result_weight, self.bias)
 
-            actual = self.HardLim(result_weight)
+                actual = self.HardLim(result_bias)
 
-            error = self.mTargets[iteration] - actual
+                error = self.targets[iteration] - actual
 
-            ep = np.multiply(ithInput, error)
+                ep = np.multiply(ith_input, error)
 
-            self.AdjustWeights(ep)
+                self.AdjustWeights(ep)
+                self.AdjustBias(error)
 
-            print('Iteration: ', iteration)
-            self.PrintWeights()
+    def Classify(self):
+        self.PrintAll()
 
-    def HardLim(self, pNetOutput):
-        return 1 if (pNetOutput >= 0).all() else 0
+        for iteration in range(self.inputs.shape[1]):
+            ith_input = np.array(self.inputs[:, iteration])
 
-    def AdjustWeights(self, pErroredInput):
-        self.mWeights = np.add(self.mWeights, pErroredInput)
+            result_weight = np.dot(self.weights, ith_input)
+            result_bias = np.add(result_weight, self.bias)
 
-    def AdjustBias(self, pErrorInput):
-        self.mBias = np.add(self.mBias, pErrorInput)
+            actual = self.HardLim(result_bias)
+
+            print('Target: ', self.targets[iteration], '\nActual: ', actual, '\n')
+
+
+    def HardLim(self, net_output):
+        return 1 if (net_output >= 0).all() else 0
+
+    def AdjustWeights(self, error_input):
+        self.setWeights(np.add(self.weights, error_input))
+
+    def AdjustBias(self, error_input):
+        self.setBias(np.add(self.bias, error_input))
 
 def main():
-    # Parameters are (S, R) = (Number of Neurons, Input Size)
-    perceptron = Perceptron(1, 2)
+    # Parameters are (S, R, E) = (Number of Neurons, Input Size, Training Epochs)
+    perceptron = Perceptron(1, 2, 5)
 
     perceptron.Initialize()
-    # perceptron.PrintAll()
     perceptron.Run()
+
+    perceptron.setInputs(np.array([-1, -1, -1]).transpose())
+    perceptron.setTargets(np.array([-1]))
+
+    perceptron.Classify()
 
 
 if __name__ == '__main__':
