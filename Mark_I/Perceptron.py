@@ -1,3 +1,4 @@
+from Data import Generate
 import numpy as np
 
 
@@ -10,6 +11,7 @@ class Perceptron:
     targets = None
     weights = None
     bias = None
+    error = 0
 
     def __init__(self, num_neurons, num_inputs, num_epochs):
         self.num_neurons = num_neurons
@@ -25,10 +27,12 @@ class Perceptron:
     def InitializeWeights(self):
         self.setWeights(np.random.rand(self.num_neurons, self.num_inputs))
 
-        self.setWeights(np.array([0.5, -1, -0.5]))
+        # self.setWeights(np.array([0.5, -1, -0.5]))
 
     def InitializeBias(self):
-        self.setBias(np.array([0.5]))
+        self.setBias(np.random.rand(self.num_neurons, 1))
+
+        # self.setBias(np.array([0.5]))
 
     def InitializeInputs(self):
         self.setInputs(np.array([[1, -1, -1], [1, 1, -1]]).transpose())
@@ -82,9 +86,10 @@ class Perceptron:
     def PrintTargets(self):
         print('Targets Shape:', self.targets.shape, '\n', self.targets, '\n')
 
-    def Run(self):
-        self.PrintAll()
+    def PrintError(self):
+        print('Percent Error: ', ((100 * self.error) / self.inputs.shape[1]))
 
+    def Train(self):
         for epoch in range(self.num_epochs):
             for iteration in range(self.inputs.shape[1]):
                 # Grab the first column of input and convert it
@@ -95,26 +100,29 @@ class Perceptron:
                 result_weight = np.dot(self.weights, ith_input)
                 result_bias = np.add(result_weight, self.bias)
 
+
                 actual = self.HardLim(result_bias)
 
                 error = self.targets[iteration] - actual
 
-                ep = np.multiply(ith_input, error)
+                ep = np.multiply(ith_input.transpose(), error)
 
                 self.AdjustWeights(ep)
                 self.AdjustBias(error)
 
     def Classify(self):
-        self.PrintAll()
-
         for iteration in range(self.inputs.shape[1]):
             ith_input = np.array(self.inputs[:, iteration])
+            ith_input = ith_input.reshape((ith_input.size, 1))
 
             result_weight = np.dot(self.weights, ith_input)
             result_bias = np.add(result_weight, self.bias)
 
             actual = self.HardLim(result_bias)
 
+            self.CalculateError(target=self.targets[iteration], actual=actual)
+
+            print('Target: ', self.targets[iteration], '\nResult: ', result_bias, '\n')
             print('Target: ', self.targets[iteration], '\nActual: ', actual, '\n')
 
 
@@ -127,17 +135,39 @@ class Perceptron:
     def AdjustBias(self, error_input):
         self.setBias(np.add(self.bias, error_input))
 
+    def CalculateError(self, target, actual):
+        if target - actual != 0:
+            self.error += 1
+
+
 def main():
     # Parameters are (S, R, E) = (Number of Neurons, Input Size, Training Epochs)
-    perceptron = Perceptron(1, 2, 5)
+    perceptron = Perceptron(1, 2, 10)
+    generate = Generate.Generate(num_data_points=1000, center_1=(5, 6), center_2=(-6, -5))
 
     perceptron.Initialize()
-    perceptron.Run()
+    perceptron.setInputs(generate.getCombinedTrainingData())
+    perceptron.setTargets(generate.getCombinedTrainingTargets())
 
-    perceptron.setInputs(np.array([-1, -1, -1]).transpose())
-    perceptron.setTargets(np.array([-1]))
+    perceptron.PrintAll()
+    perceptron.Train()
+
+    perceptron.setInputs(generate.getCombinedTestData())
+    perceptron.setTargets(generate.getCombinedTestTargets())
 
     perceptron.Classify()
+
+    perceptron.PrintError()
+
+    generate.PlotData()
+
+
+    # perceptron.Run()
+    #
+    # perceptron.setInputs(np.array([-1, -1, -1]).transpose())
+    # perceptron.setTargets(np.array([-1]))
+    #
+    # perceptron.Classify()
 
 
 if __name__ == '__main__':
