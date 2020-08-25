@@ -87,7 +87,7 @@ class Perceptron:
         print('Targets Shape:', self.targets.shape, '\n', self.targets, '\n')
 
     def PrintError(self):
-        print('Percent Error: ', ((100 * self.error) / self.inputs.shape[1]))
+        print('Percent Error: ', ((100 * self.error) / self.inputs.shape[1]), '%')
 
     def Train(self):
         for epoch in range(self.num_epochs):
@@ -141,9 +141,9 @@ class Perceptron:
 
 
 def main():
-    # Parameters are (S, R, E) = (Number of Neurons, Input Size, Training Epochs)
-    perceptron = Perceptron(1, 2, 10)
-    generate = Generate.Generate(num_data_points=1000, center_1=(5, 6), center_2=(-6, -5))
+    # Parameters are (S, R, E) = (Number of Neurons, Number of Inputs, Training Epochs)
+    perceptron = Perceptron(1, 2, 100)
+    generate = Generate.Generate(num_data_points=5000, center_1=(5, 6), center_2=(-6, -5))
 
     perceptron.Initialize()
     perceptron.setInputs(generate.getCombinedTrainingData())
@@ -160,14 +160,6 @@ def main():
     perceptron.PrintError()
 
     generate.PlotData()
-
-
-    # perceptron.Run()
-    #
-    # perceptron.setInputs(np.array([-1, -1, -1]).transpose())
-    # perceptron.setTargets(np.array([-1]))
-    #
-    # perceptron.Classify()
 
 
 if __name__ == '__main__':
