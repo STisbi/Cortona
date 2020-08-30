@@ -68,6 +68,12 @@ class Perceptron:
         if targets.ndim < 2:
             self.targets = self.targets.reshape((self.targets.size, 1))
 
+    def getWeights(self):
+        return self.weights
+
+    def getBias(self):
+        return self.bias
+
     def PrintAll(self):
         self.PrintWeights()
         self.PrintBias()
@@ -142,8 +148,8 @@ class Perceptron:
 
 def main():
     # Parameters are (S, R, E) = (Number of Neurons, Number of Inputs, Training Epochs)
-    perceptron = Perceptron(1, 2, 100)
-    generate = Generate.Generate(num_data_points=5000, center_1=(5, 6), center_2=(-6, -5))
+    perceptron = Perceptron(1, 2, 10)
+    generate = Generate.Generate(num_data_points=500, center_1=(10, 10), center_2=(-10, -10))
 
     perceptron.Initialize()
     perceptron.setInputs(generate.getCombinedTrainingData())
@@ -159,7 +165,10 @@ def main():
 
     perceptron.PrintError()
 
-    generate.PlotData()
+    perceptron.PrintWeights()
+    perceptron.PrintBias()
+
+    generate.PlotData(perceptron.getWeights(), perceptron.getBias())
 
 
 if __name__ == '__main__':
