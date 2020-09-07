@@ -173,7 +173,7 @@ def main():
     perceptron.PrintWeights()
     perceptron.PrintBias()
 
-    # generate.PlotData(perceptron.getWeights(), perceptron.getBias())
+    generate.PlotData(perceptron.getWeights(), perceptron.getBias())
     generate.PlotDataAcrossTime(perceptron.getWeightsAcrossTime(), perceptron.getBias())
 
 
