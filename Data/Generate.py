@@ -32,9 +32,8 @@ class Generate:
         self.test_targets_2 = np.ones(shape=(1, num_data_points // 4))
 
     def PlotData(self, weights, bias):
-        boundary = np.divide(np.multiply(-1, bias), weights)
-        boundary_x = [boundary[0][0], 0]
-        boundary_y = [boundary[0][1], 0]
+        boundary_x = [-1 * weights[0][1], 0]
+        boundary_y = [weights[0][0], 0]
 
         weight_x = [weights[0][0], 0]
         weight_y = [weights[0][1], 0]
@@ -49,6 +48,35 @@ class Generate:
         plt.scatter(self.test_data_2[0, :], self.test_data_2[1, :], label='Test Data 2')
 
         plt.legend()
+        plt.show()
+
+    def PlotDataAcrossTime(self, weights, bias):
+        plt.scatter(self.training_data_1[0, :], self.training_data_1[1, :], label='Training Data 1')
+        plt.scatter(self.training_data_2[0, :], self.training_data_2[1, :], label='Training Data 2')
+
+        plt.scatter(self.test_data_1[0, :], self.test_data_1[1, :], label='Test Data 1')
+        plt.scatter(self.test_data_2[0, :], self.test_data_2[1, :], label='Test Data 2')
+
+        plt.legend()
+
+        for weight in weights:
+            boundary_x = [-1 * weight[0][1], 0]
+            boundary_y = [weight[0][0], 0]
+
+            weight_x = [weight[0][0], 0]
+            weight_y = [weight[0][1], 0]
+
+            boundary_vector, = plt.plot(boundary_x, boundary_y, 'b', label='Boundary')
+            weight_vector, = plt.plot(weight_x, weight_y, 'k', label='Weight Vector')
+
+            plt.pause(1)
+            plt.legend()
+
+            boundary_vector.remove()
+            weight_vector.remove()
+
+            plt.draw()
+
         plt.show()
 
     def getTrainingData_1(self):

@@ -12,6 +12,7 @@ class Perceptron:
     weights = None
     bias = None
     error = 0
+    time = []
 
     def __init__(self, num_neurons, num_inputs, num_epochs):
         self.num_neurons = num_neurons
@@ -71,6 +72,9 @@ class Perceptron:
     def getWeights(self):
         return self.weights
 
+    def getWeightsAcrossTime(self):
+        return self.time
+
     def getBias(self):
         return self.bias
 
@@ -98,6 +102,8 @@ class Perceptron:
     def Train(self):
         for epoch in range(self.num_epochs):
             for iteration in range(self.inputs.shape[1]):
+                self.time.append(self.getWeights())
+
                 # Grab the first column of input and convert it
                 # from (n,) to (n, 1)
                 ith_input = np.array(self.inputs[:, iteration])
@@ -105,7 +111,6 @@ class Perceptron:
 
                 result_weight = np.dot(self.weights, ith_input)
                 result_bias = np.add(result_weight, self.bias)
-
 
                 actual = self.HardLim(result_bias)
 
@@ -148,8 +153,8 @@ class Perceptron:
 
 def main():
     # Parameters are (S, R, E) = (Number of Neurons, Number of Inputs, Training Epochs)
-    perceptron = Perceptron(1, 2, 10)
-    generate = Generate.Generate(num_data_points=500, center_1=(10, 10), center_2=(-10, -10))
+    perceptron = Perceptron(1, 2, 1)
+    generate = Generate.Generate(num_data_points=50, center_1=(5, 5), center_2=(-5, -5))
 
     perceptron.Initialize()
     perceptron.setInputs(generate.getCombinedTrainingData())
@@ -168,7 +173,8 @@ def main():
     perceptron.PrintWeights()
     perceptron.PrintBias()
 
-    generate.PlotData(perceptron.getWeights(), perceptron.getBias())
+    # generate.PlotData(perceptron.getWeights(), perceptron.getBias())
+    generate.PlotDataAcrossTime(perceptron.getWeightsAcrossTime(), perceptron.getBias())
 
 
 if __name__ == '__main__':
